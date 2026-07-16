@@ -81,8 +81,8 @@ export async function updateRoomDetails(id, { floor, room_number, room_type }) {
   const room = rooms.find((r) => r.id === id);
   if (!room) throw new Error("Room not found.");
 
-  const newFloor = Number(floor);
-  const newRoomNumber = Number(room_number);
+  const newFloor = floor;
+  const newRoomNumber = room_number;
   const newType = Number(room_type);
   const newCapacity = newType;
   const typeChanged = newType !== Number(room.room_type);
