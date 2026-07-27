@@ -188,6 +188,7 @@ function openEditRoomModal(room) {
             <input type="text" id="e-room-number" value="${room.room_number}" required /></div>
           <div class="f-field span-2"><label>Room Type (Sharing) <span class="req">*</span></label>
             <select id="e-type" required>
+              <option value="1" ${Number(room.room_type) === 1 ? "selected" : ""}>1-Sharing</option>
               <option value="2" ${Number(room.room_type) === 2 ? "selected" : ""}>2-Sharing</option>
               <option value="3" ${Number(room.room_type) === 3 ? "selected" : ""}>3-Sharing</option>
             </select>
@@ -239,6 +240,7 @@ function openAddRoomModal() {
             <input type="text" id="f-room-number" required /></div>
           <div class="f-field span-2"><label>Room Type <span class="req">*</span></label>
             <select id="f-type" required>
+              <option value="1">1-Sharing</option>
               <option value="2">2-Sharing</option>
               <option value="3">3-Sharing</option>
             </select>
