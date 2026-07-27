@@ -82,7 +82,9 @@ function renderTable() {
       <td class="mono">${index + 1}</td>
       <td class="name-cell">${p.students?.name || "—"}</td>
       <td class="mono">${p.students?.rooms?.room_number || "—"}</td>
-      <td class="num">${formatINR(p.room_rent)}</td>
+      <td>
+        <input type="number" class="rent-inline-input" data-id="${p.id}" min="0" value="${Number(p.room_rent || 0)}" />
+      </td>
       
       <td>
         <input type="number" class="mess-inline-input" data-id="${p.id}" min="0" value="${Number(p.mess_charge || 0)}" />
@@ -105,29 +107,37 @@ function renderTable() {
   });
 
   qsa(".mess-inline-input", tbody).forEach((input) => {
-    input.addEventListener("change", () => updateMessInline(input));
+    input.addEventListener("change", () =>
+      updateChargeInline(input, "mess_charge", "Mess charge"),
+    );
+  });
+
+  qsa(".rent-inline-input", tbody).forEach((input) => {
+    input.addEventListener("change", () =>
+      updateChargeInline(input, "room_rent", "Rent"),
+    );
   });
 }
 
-async function updateMessInline(input) {
+async function updateChargeInline(input, field, label) {
   const id = input.dataset.id;
   const p = payments.find((x) => x.id === id);
   if (!p) return;
-  const mess_charge = Number(input.value || 0);
-  if (mess_charge === Number(p.mess_charge || 0)) return;
+  const nextValue = Number(input.value || 0);
+  if (nextValue === Number(p[field] || 0)) return;
 
   const row = input.closest("tr");
   input.disabled = true;
   try {
-    const updated = await collectPayment(id, { mess_charge });
+    const updated = await collectPayment(id, { [field]: nextValue });
     // Merge the recalculated fields back into our local copy so the
     // Collect Payment modal and Receipt immediately reflect the new total.
-    Object.assign(p, updated || {}, { mess_charge });
+    Object.assign(p, updated || {}, { [field]: nextValue });
     if (!updated) {
       // demo/mock path already returns the merged+recomputed record; if a
       // configured backend returns nothing unexpected, recompute locally.
       p.total_amount =
-        Number(p.room_rent) + Number(p.bike_charge) + mess_charge;
+        Number(p.room_rent) + Number(p.bike_charge) + Number(p.mess_charge);
       p.balance = p.total_amount - Number(p.amount_paid);
       p.status =
         p.amount_paid <= 0
@@ -151,10 +161,10 @@ async function updateMessInline(input) {
         `<span class="badge ${statusBadge[p.status]}">${p.status}</span>`;
     }
     renderStats();
-    toast(`Mess charge updated for ${p.students?.name || "this student"}.`);
+    toast(`${label} updated for ${p.students?.name || "this student"}.`);
   } catch (err) {
-    toast(err.message || "Could not update mess charge.", "error");
-    input.value = p.mess_charge;
+    toast(err.message || `Could not update ${label.toLowerCase()}.`, "error");
+    input.value = p[field];
   } finally {
     input.disabled = false;
   }
@@ -185,32 +195,39 @@ function openCollectModal(p) {
 
   function recalcTotal() {
     const rent = Number(qs("#c-rent", el).value || 0);
-    const bike = Number(qs("#c-bike", el).value || 0);
+    const bike = Number(qs("#c-bike", el)?.value ?? p.bike_charge ?? 0);
     const mess = Number(qs("#c-mess", el).value || 0);
     qs("#c-total", el).value = formatINR(rent + bike + mess);
   }
   ["#c-rent", "#c-bike", "#c-mess"].forEach((sel) =>
-    qs(sel, el).addEventListener("input", recalcTotal),
+    qs(sel, el)?.addEventListener("input", recalcTotal),
   );
 
   el.querySelector("#c-save").addEventListener("click", async () => {
+    const saveBtn = qs("#c-save", el);
     const room_rent = Number(qs("#c-rent", el).value || 0);
-    const bike_charge = Number(qs("#c-bike", el).value || 0);
+    const bike_charge = Number(qs("#c-bike", el)?.value ?? p.bike_charge ?? 0);
     const mess_charge = Number(qs("#c-mess", el).value || 0);
     const amount_paid = Number(qs("#c-amount", el).value || 0);
-    await collectPayment(p.id, {
-      room_rent,
-      bike_charge,
-      mess_charge,
-      amount_paid,
-      payment_method: qs("#c-method", el).value,
-      transaction_number: qs("#c-txn", el).value.trim(),
-      payment_date: qs("#c-date", el).value,
-      remarks: qs("#c-remarks", el).value.trim(),
-    });
-    toast(`Payment recorded for ${p.students?.name || "student"}.`);
-    closeModal();
-    refresh();
+    saveBtn.disabled = true;
+    try {
+      await collectPayment(p.id, {
+        room_rent,
+        bike_charge,
+        mess_charge,
+        amount_paid,
+        payment_method: qs("#c-method", el).value,
+        transaction_number: qs("#c-txn", el).value.trim(),
+        payment_date: qs("#c-date", el).value,
+        remarks: qs("#c-remarks", el).value.trim(),
+      });
+      toast(`Payment recorded for ${p.students?.name || "student"}.`);
+      closeModal();
+      refresh();
+    } catch (err) {
+      toast(err.message || "Could not save payment.", "error");
+      saveBtn.disabled = false;
+    }
   });
 }
 

@@ -417,3 +417,29 @@ select.tb-filter-sm:focus {
 .mess-inline-input:disabled {
   opacity: 0.5;
 }
+.rent-inline-input {
+  width: 90px;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: right;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.rent-inline-input:hover {
+  border-color: var(--line-strong);
+}
+.rent-inline-input:focus {
+  outline: none;
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(184, 145, 42, 0.15);
+}
+.rent-inline-input:disabled {
+  opacity: 0.5;
+}
