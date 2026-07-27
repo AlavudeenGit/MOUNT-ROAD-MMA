@@ -188,8 +188,8 @@ async function openStudentFormModal(existing = null) {
             </select></div>
    
 
-          <div class="f-field"><label>Caution Deposit (₹)</label><input type="number" id="f-caution-deposit" min="0" value="${isEdit ? (existing.caution_deposit ?? "") : ""}" /></div>
-          <div class="f-field"><label>Mess Deposit (₹)</label><input type="number" id="f-mess-deposit" min="0" value="${isEdit ? (existing.mess_deposit ?? "") : ""}" /></div>
+          <div class="f-field"><label>Caution Deposit (₹)</label><input type="number" id="f-caution-deposit" min="0"  value="${isEdit ? (existing.caution_deposit ?? 10000) : 10000}" /></div>
+          <div class="f-field"><label>Mess Deposit (₹)</label><input type="number" id="f-mess-deposit" min="0"  value="${isEdit ? (existing.mess_deposit ?? 3000) : 3000}" /></div>
           <div class="f-field"><label>Alternative Mobile</label><input type="tel" id="f-alt-mobile" value="${v("alt_mobile")}" /></div>
           <div class="f-field"><label>Email</label><input type="email" id="f-email" value="${v("email")}" /></div>
           <div class="f-field"><label>Mess Available</label>
